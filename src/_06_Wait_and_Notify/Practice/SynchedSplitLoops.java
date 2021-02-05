@@ -15,8 +15,9 @@ printed in order.
   
 */
 
-public class SynchedSplitLoops {
+public class SynchedSplitLoops implements Runnable {
 	static int counter = 0;
+	Object lock = new Object();
 	
 	public static void main(String[] args) {
 		Thread t1 = new Thread(() -> {
@@ -41,5 +42,18 @@ public class SynchedSplitLoops {
 			System.err.println("Could not join threads");
 		}
 		
+	}
+	
+	@Override
+	public void run() {
+		
+		synchronized(lock) {
+			lock.notify();
+			try {
+				lock.wait();
+			} catch (InterruptedException e) {
+				System.out.println("error!");
+			}
+		}
 	}
 }
