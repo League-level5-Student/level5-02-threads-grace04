@@ -17,18 +17,36 @@ printed in order.
 
 public class SynchedSplitLoops implements Runnable {
 	static int counter = 0;
-	Object lock = new Object();
+	static Object lock = new Object();
 	
 	public static void main(String[] args) {
 		Thread t1 = new Thread(() -> {
-			for(int i = 0; i < 100000; i++) {
-				counter++;
+			synchronized(lock) {
+				for(int i = 0; i < 100000; i++) {
+					counter++;
+					lock.notify();
+					try {
+						lock.wait();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 		});
 		
 		Thread t2 = new Thread(() -> {
-			for(int i = 0; i < 100000; i++) {
-				System.out.println(counter);
+			synchronized(lock) {
+				for(int i = 0; i < 100000; i++) {
+					System.out.println(counter);
+					lock.notify();
+					try {
+						lock.wait();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 		});
 		
@@ -43,17 +61,10 @@ public class SynchedSplitLoops implements Runnable {
 		}
 		
 	}
-	
+
 	@Override
 	public void run() {
+		// TODO Auto-generated method stub
 		
-		synchronized(lock) {
-			lock.notify();
-			try {
-				lock.wait();
-			} catch (InterruptedException e) {
-				System.out.println("error!");
-			}
-		}
 	}
 }
